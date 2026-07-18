@@ -18,13 +18,23 @@ async function login(req, res, next) {
     if (!admin) {
       return res.status(401).json({ success: false, message: 'Invalid username or password.' });
     }
+
+     console.log("Super admin login:", username, admin);
+
     const match = await bcrypt.compare(password, admin.password_hash);
     if (!match) {
       return res.status(401).json({ success: false, message: 'Invalid username or password.' });
     }
 
+    console.log("Password verified");
+
     generateToken(res, { superAdminId: admin.id, username: admin.username, role: 'super_admin' }, 'super_token');
+
+
     res.json({ success: true, data: { username: admin.username } });
+
+    console.log("Token sent");
+
   } catch (err) {
     next(err);
   }
