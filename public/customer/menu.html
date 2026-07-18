@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<title>Menu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Manrope:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/customer/css/style.css" />
+</head>
+<body>
+<div class="app-shell" id="appShell">
+
+  <header class="topbar">
+    <div>
+      <div class="restaurant-name" id="restaurantName">Loading…</div>
+      <span class="restaurant-sub" id="tableLabel"></span>
+    </div>
+    <button class="order-badge" id="cartBtn" onclick="location.href='/customer/cart.html'">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+      <span id="cartLabel">Order (0)</span>
+    </button>
+  </header>
+
+  <div class="search-wrap">
+    <div class="search-box">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="searchInput" placeholder="Search for dishes..." />
+    </div>
+  </div>
+
+  <nav class="category-tabs" id="categoryTabs"></nav>
+
+  <main class="food-list" id="foodList">
+    <div class="center-loading">Loading menu…</div>
+  </main>
+
+  <div class="bottom-bar">
+    <button class="btn-waiter" id="waiterBtn">Call Waiter</button>
+    <button class="btn-view-cart" onclick="location.href='/customer/cart.html'">
+      View Order <span id="cartTotalLabel"></span>
+    </button>
+  </div>
+
+  <div id="itemOverlayRoot"></div>
+  <div id="toastRoot"></div>
+</div>
+
+<script src="/customer/js/api.js"></script>
+<script src="/customer/js/cart.js"></script>
+<script src="/customer/js/menu.js"></script>
+</body>
+</html>

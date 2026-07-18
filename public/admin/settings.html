@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Settings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Manrope:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/admin/css/admin.css" />
+</head>
+<body>
+<div class="admin-shell">
+  <aside class="sidebar">
+    <div class="sidebar-logo">Bite<span class="accent">Spot</span></div>
+    <nav class="sidebar-nav">
+      <a href="/admin/dashboard.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>Dashboard</a>
+      <a href="/admin/menu.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18"/><path d="M3 3c0 4 4 4 4 8s-4 4-4 8"/><path d="M17 3v18"/><path d="M21 3v6a4 4 0 0 1-4 4"/></svg>Menu</a>
+      <a href="/admin/orders.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11H3l3-8h12l3 8h-6"/><path d="M3 11l1 9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2l1-9"/><path d="M9 15a3 3 0 0 0 6 0"/></svg>Orders</a>
+      <a href="/admin/tables.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg>Tables &amp; QR</a>
+      <a href="/admin/settings.html" class="active"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</a>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn btn-outline btn-full" id="logoutBtn">Log Out</button>
+    </div>
+  </aside>
+
+  <div class="main-area">
+    <header class="main-header">
+      <h1>Settings</h1>
+      <div id="headerRestaurantName" style="font-size:14px;color:var(--cream-dim);font-weight:600"></div>
+    </header>
+    <main class="main-content" id="mainContent">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;max-width:900px">
+
+        <div class="panel">
+          <div class="panel-header"><h2>Restaurant Profile</h2></div>
+          <div class="panel-body">
+            <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+              <img id="logoPreview" src="" alt="Logo" style="width:64px;height:64px;border-radius:12px;object-fit:cover;background:var(--umber-2);display:none" />
+              <div>
+                <input type="file" id="logoInput" accept="image/png, image/jpeg, image/webp" style="display:none" />
+                <button class="btn btn-outline" id="logoUploadBtn" style="padding:8px 14px;font-size:13px">Upload Logo</button>
+              </div>
+            </div>
+            <div class="field"><label>Restaurant Name</label><input type="text" id="settingsName" /></div>
+            <div class="field"><label>Phone Number</label><input type="text" id="settingsPhone" placeholder="e.g. 0803 123 4567" /></div>
+            <div class="field"><label>Address</label><input type="text" id="settingsAddress" /></div>
+            <div class="field"><label>Opening Hours</label><input type="text" id="settingsHours" placeholder="e.g. 9:00 AM - 10:00 PM daily" /></div>
+            <button class="btn btn-orange" id="saveSettingsBtn">Save Changes</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header"><h2>Change Password</h2></div>
+          <div class="panel-body">
+            <div class="field"><label>Current Password</label><input type="password" id="currentPassword" /></div>
+            <div class="field"><label>New Password</label><input type="password" id="newPassword" minlength="6" /></div>
+            <button class="btn btn-orange" id="changePasswordBtn">Update Password</button>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<script src="/admin/js/admin-api.js"></script>
+<script src="/admin/js/admin-shell.js"></script>
+<script src="/admin/js/settings-admin.js"></script>
+</body>
+</html>

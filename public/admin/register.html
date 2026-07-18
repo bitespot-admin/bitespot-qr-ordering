@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Register Your Restaurant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Manrope:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/admin/css/admin.css" />
+</head>
+<body>
+<div class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-logo">Bite<span class="accent">Spot</span></div>
+    <p class="auth-sub">Set up QR table ordering for your restaurant</p>
+
+    <div class="form-error" id="formError"></div>
+
+    <form id="registerForm">
+      <div class="field">
+        <label>Restaurant Name</label>
+        <input type="text" id="restaurantName" placeholder="e.g. Bella Kitchen" required />
+      </div>
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="username" autocomplete="username" required />
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="password" autocomplete="new-password" minlength="6" required />
+        <span style="font-size:12px;color:var(--cream-dim)">At least 6 characters</span>
+      </div>
+      <button type="submit" class="btn btn-orange btn-full" id="submitBtn">Create Account</button>
+    </form>
+
+    <p class="auth-switch">Already have an account? <a href="/admin/login.html">Log in</a></p>
+  </div>
+</div>
+
+<script src="/admin/js/admin-api.js"></script>
+<script>
+  document.getElementById('registerForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const errorBox = document.getElementById('formError');
+    const btn = document.getElementById('submitBtn');
+    errorBox.classList.remove('show');
+    btn.disabled = true;
+    btn.textContent = 'Creating account...';
+
+    try {
+      await AdminApi.register({
+        restaurantName: document.getElementById('restaurantName').value.trim(),
+        username: document.getElementById('username').value.trim(),
+        password: document.getElementById('password').value
+      });
+      location.href = '/admin/dashboard.html';
+    } catch (err) {
+      errorBox.textContent = err.message;
+      errorBox.classList.add('show');
+      btn.disabled = false;
+      btn.textContent = 'Create Account';
+    }
+  });
+</script>
+</body>
+</html>

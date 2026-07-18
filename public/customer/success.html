@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<title>Order Sent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Manrope:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/customer/css/style.css" />
+</head>
+<body>
+<div class="app-shell">
+  <div class="success-wrap">
+    <div class="success-icon">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+    </div>
+    <h1>Order Sent!</h1>
+    <p class="order-number" id="orderNumberLabel"></p>
+    <div class="wait-time">
+      Estimated wait: <strong>20–30 minutes</strong><br/>
+      The kitchen has received your order and your waiter will bring it to your table.
+    </div>
+    <button class="btn-primary-full" style="max-width:280px" id="trackBtn">Track My Order</button>
+    <button class="icon-btn" style="color:var(--cream-dim);font-size:13.5px;font-weight:700;margin-top:4px" id="backToMenuBtn">Back to Menu</button>
+  </div>
+</div>
+<script>
+  const orderNumber = sessionStorage.getItem('qr_last_order_number');
+  const tableLabel = sessionStorage.getItem('qr_table_label');
+  document.getElementById('orderNumberLabel').textContent = [
+    orderNumber ? `Order ${orderNumber}` : null,
+    tableLabel || null
+  ].filter(Boolean).join(' · ');
+
+  document.getElementById('trackBtn').addEventListener('click', () => {
+    location.href = '/customer/order-status.html';
+  });
+  document.getElementById('backToMenuBtn').addEventListener('click', () => {
+    goToMenu();
+  });
+
+  function goToMenu() {
+    const restaurantSlug = sessionStorage.getItem('qr_restaurant_slug');
+    const tableSlug = sessionStorage.getItem('qr_table_slug');
+    location.href = restaurantSlug && tableSlug ? `/menu/${restaurantSlug}/${tableSlug}` : '/customer/menu.html';
+  }
+</script>
+</body>
+</html>
