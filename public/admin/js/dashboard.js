@@ -4,7 +4,15 @@ async function init() {
   wireAdminChrome(restaurant);
 
   await Promise.all([loadStats(), loadWaiterCalls()]);
-  setInterval(loadWaiterCalls, 15000); // light polling for new waiter calls
+
+  connectAdminRealtime({
+    onNewOrder: () => loadStats(),
+    onOrderStatus: () => loadStats(),
+    onWaiterCall: () => loadWaiterCalls()
+  });
+
+  // Fallback only, in case the socket connection drops silently.
+  setInterval(loadWaiterCalls, 30000);
 }
 
 async function loadStats() {

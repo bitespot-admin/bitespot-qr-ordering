@@ -28,6 +28,31 @@
   --font-mono: "Space Mono", ui-monospace, monospace;
 }
 
+/* ---------- Light theme (the original white/orange look) ----------
+   Default is dark; this activates when <html data-theme="light"> is
+   set (see theme.js). Same component rules everywhere else in this
+   file — only the token values change. */
+[data-theme="light"] {
+  --char: #f7f7f8;
+  --umber: #ffffff;
+  --umber-2: #f0f0f2;
+  --cream: #14151a;
+  --cream-dim: #6b6f7b;
+  --ember: #f5a623;
+  --ember-bright: #e0940f;
+  --ember-tint: #fdf1dc;
+  --sage: #1e8e5a;
+  --sage-tint: #e7f6ef;
+  --clay: #c0392b;
+  --clay-tint: #fbeceb;
+  --blue: #2563eb;
+  --blue-tint: #e8f0fe;
+  --border: #e7e8ec;
+  --border-soft: rgba(20, 21, 26, 0.04);
+  --shadow-card: 0 1px 3px rgba(20, 21, 26, 0.06), 0 1px 2px rgba(20, 21, 26, 0.04);
+}
+[data-theme="light"] .auth-wrap::before { display: none; }
+
 * { box-sizing: border-box; }
 
 @media (prefers-reduced-motion: reduce) {
@@ -490,18 +515,4 @@ a { text-decoration: none; color: inherit; }
   .kitchen-board { grid-template-columns: 1fr; }
   .main-content { padding: 20px 16px 60px; }
   .main-header { padding: 0 16px; }
-}
-
-.order-total {
-  margin-top: 12px;
-  padding: 10px 12px;
-  background: rgba(255, 165, 0, 0.08);
-  border: 1px solid rgba(255, 165, 0, 0.25);
-  border-radius: 8px;
-  font-size: 15px;
-  font-weight: 600;
-}
-
-.order-total strong {
-  color: var(--orange);
 }

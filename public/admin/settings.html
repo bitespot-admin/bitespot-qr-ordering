@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>(function(){try{var t=localStorage.getItem('bitespot_theme')||'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Settings</title>
@@ -61,6 +62,51 @@
         </div>
 
       </div>
+
+      <div class="panel" style="max-width:900px;margin-top:20px">
+        <div class="panel-header"><h2>Table Flyer</h2></div>
+        <div class="panel-body">
+          <p style="font-size:13.5px;color:var(--cream-dim);margin:0 0 18px">
+            Choose how each table's QR flyer looks. <strong style="color:var(--cream)">Default</strong> uses our branded
+            artwork with your restaurant's name and a QR code. <strong style="color:var(--cream)">Custom</strong> lets you
+            upload your own design — we'll place just the QR code centered on top of it.
+          </p>
+
+          <div style="display:flex;gap:10px;margin-bottom:20px">
+            <button class="btn" id="flyerModeDefaultBtn" style="flex:1">Default Template</button>
+            <button class="btn" id="flyerModeCustomBtn" style="flex:1">Custom Upload</button>
+          </div>
+
+          <div id="customFlyerUploadRow" style="display:none;align-items:center;gap:16px;margin-bottom:8px">
+            <img id="customFlyerPreview" src="" alt="Custom flyer" style="width:70px;height:106px;border-radius:8px;object-fit:cover;background:var(--umber-2);display:none;border:1px solid var(--border)" />
+            <div>
+              <input type="file" id="customFlyerInput" accept="image/png, image/jpeg, image/webp" style="display:none" />
+              <button class="btn btn-outline" id="customFlyerUploadBtn" style="padding:8px 14px;font-size:13px">Upload Custom Flyer Image</button>
+              <p style="font-size:12px;color:var(--cream-dim);margin:8px 0 0">
+                After uploading, use "Regenerate Flyer" on each table (in Tables &amp; QR) to apply it.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" style="max-width:900px;margin-top:20px">
+        <div class="panel-header">
+          <h2>Cloudinary Account</h2>
+          <span id="cloudinaryStatusTag"></span>
+        </div>
+        <div class="panel-body">
+          <p style="font-size:13.5px;color:var(--cream-dim);margin:0 0 18px">
+            Your menu photos, logo, and QR flyers are hosted on your own Cloudinary account. Your platform administrator
+            usually sets this up when your restaurant is created — use this only to check what's connected or to switch
+            to a different Cloudinary account.
+          </p>
+          <div class="field"><label>Cloud Name</label><input type="text" id="cloudName" placeholder="e.g. dxyzabc123" /></div>
+          <div class="field"><label>API Key</label><input type="text" id="cloudApiKey" placeholder="e.g. 123456789012345" /></div>
+          <div class="field"><label>API Secret</label><input type="password" id="cloudApiSecret" placeholder="Enter to set or replace" /></div>
+          <button class="btn btn-orange" id="saveCloudinaryBtn">Save Cloudinary Credentials</button>
+        </div>
+      </div>
     </main>
   </div>
 </div>
@@ -68,5 +114,6 @@
 <script src="/admin/js/admin-api.js"></script>
 <script src="/admin/js/admin-shell.js"></script>
 <script src="/admin/js/settings-admin.js"></script>
+<script src="/shared/theme-toggle.js"></script>
 </body>
 </html>

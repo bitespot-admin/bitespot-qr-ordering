@@ -35,6 +35,7 @@ const AdminApi = {
   // Tables
   getTables() { return this._request('/tables'); },
   createTable(body) { return this._request('/tables', { method: 'POST', body: JSON.stringify(body) }); },
+  regenerateFlyer(id) { return this._request(`/tables/${id}/regenerate-flyer`, { method: 'PATCH' }); },
   deleteTable(id) { return this._request(`/tables/${id}`, { method: 'DELETE' }); },
 
   // Orders
@@ -48,7 +49,11 @@ const AdminApi = {
 
   // Settings
   updateSettings(body) { return this._request('/settings', { method: 'PATCH', body: JSON.stringify(body) }); },
-  updateLogo(formData) { return this._request('/settings/logo', { method: 'PATCH', body: formData }); }
+  updateLogo(formData) { return this._request('/settings/logo', { method: 'PATCH', body: formData }); },
+  updateFlyerMode(flyerMode) { return this._request('/settings/flyer-mode', { method: 'PATCH', body: JSON.stringify({ flyerMode }) }); },
+  updateCustomFlyer(formData) { return this._request('/settings/custom-flyer', { method: 'PATCH', body: formData }); },
+  getCloudinaryCredentials() { return this._request('/settings/cloudinary'); },
+  updateCloudinaryCredentials(body) { return this._request('/settings/cloudinary', { method: 'PATCH', body: JSON.stringify(body) }); }
 };
 
 function formatNaira(amount) {

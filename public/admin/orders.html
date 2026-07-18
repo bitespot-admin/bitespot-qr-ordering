@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>(function(){try{var t=localStorage.getItem('bitespot_theme')||'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Orders</title>
@@ -49,8 +50,12 @@
   </div>
 </div>
 
+<script src="/socket.io/socket.io.js"></script>
 <script src="/admin/js/admin-api.js"></script>
 <script src="/admin/js/admin-shell.js"></script>
+<script src="/admin/js/admin-realtime.js"></script>
+<script src="/admin/js/receipt.js"></script>
 <script src="/admin/js/orders-admin.js"></script>
+<script src="/shared/theme-toggle.js"></script>
 </body>
 </html>

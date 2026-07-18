@@ -29,12 +29,21 @@ function renderTables() {
     ${TABLES.map(
       (t) => `
       <div class="table-card">
-        <img src="${t.qr_code_url}" alt="QR for ${escapeHtml(t.label)}" />
+        ${
+          t.qr_code_url
+            ? `<img src="${t.qr_code_url}" alt="QR for ${escapeHtml(t.label)}" />`
+            : `<div class="empty-state" style="padding:30px 10px;border:1px dashed var(--border);border-radius:12px;margin-bottom:14px;font-size:12.5px">Flyer not generated yet</div>`
+        }
         <h3>${escapeHtml(t.label)}</h3>
         <div class="actions">
-          <a href="${t.qr_code_url}" download="${escapeHtml(t.slug)}-flyer.png" class="btn btn-outline">Download Flyer</a>
-          <button class="btn btn-danger-outline" data-del-table="${t.id}">Delete</button>
+          ${
+            t.qr_code_url
+              ? `<a href="${t.qr_code_url}" download="${escapeHtml(t.slug)}-flyer.png" class="btn btn-outline">Download Flyer</a>`
+              : ''
+          }
+          <button class="btn ${t.qr_code_url ? 'btn-outline' : 'btn-orange'}" data-regen-table="${t.id}">Regenerate Flyer</button>
         </div>
+        <button class="btn btn-danger-outline btn-full" data-del-table="${t.id}" style="margin-top:8px;padding:8px;font-size:12.5px">Delete</button>
       </div>`
     ).join('')}
   </div>`;
@@ -42,6 +51,24 @@ function renderTables() {
   body.querySelectorAll('[data-del-table]').forEach((btn) =>
     btn.addEventListener('click', () => deleteTable(btn.dataset.delTable))
   );
+  body.querySelectorAll('[data-regen-table]').forEach((btn) =>
+    btn.addEventListener('click', () => regenerateFlyer(btn.dataset.regenTable, btn))
+  );
+}
+
+async function regenerateFlyer(id, btn) {
+  const original = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Regenerating...';
+  try {
+    await AdminApi.regenerateFlyer(id);
+    showToast('Flyer regenerated.');
+    loadTables();
+  } catch (err) {
+    showToast(err.message, true);
+    btn.disabled = false;
+    btn.textContent = original;
+  }
 }
 
 function openAddTableModal() {
@@ -82,9 +109,12 @@ function openAddTableModal() {
     btn.textContent = 'Generating flyer...';
 
     try {
-      await AdminApi.createTable({ label });
+      const result = await AdminApi.createTable({ label });
       closeModal();
       loadTables();
+      if (result.flyerError) {
+        showToast('Table added, but the flyer failed to generate — tap "Regenerate Flyer" to retry.', true);
+      }
     } catch (err) {
       showToast(err.message, true);
       btn.disabled = false;

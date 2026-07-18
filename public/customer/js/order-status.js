@@ -12,6 +12,7 @@ const STATUS_COPY = {
 };
 
 let pollTimer = null;
+let socket = null;
 
 function escapeHtml(str) {
   return String(str).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -30,7 +31,18 @@ async function init() {
   }
 
   await load(orderId, tableSlug);
-  pollTimer = setInterval(() => load(orderId, tableSlug), 6000);
+
+  // Real-time: join this order's room so the moment the kitchen updates
+  // its status, this page updates instantly instead of waiting on a poll.
+  socket = io();
+  socket.emit('track-order', { orderId });
+  socket.on('order:status', (payload) => {
+    if (String(payload.id) === String(orderId)) load(orderId, tableSlug);
+  });
+
+  // Fallback only, in case the socket connection drops (e.g. patchy
+  // restaurant wifi) — keeps the page eventually-correct either way.
+  pollTimer = setInterval(() => load(orderId, tableSlug), 20000);
 }
 
 async function load(orderId, tableSlug) {
@@ -39,10 +51,12 @@ async function load(orderId, tableSlug) {
     render(order);
     if (order.status === 'served' || order.status === 'cancelled') {
       clearInterval(pollTimer);
+      if (socket) socket.disconnect();
     }
   } catch (err) {
     document.getElementById('statusBody').innerHTML = `<div class="empty-state">${escapeHtml(err.message)}</div>`;
     clearInterval(pollTimer);
+    if (socket) socket.disconnect();
   }
 }
 

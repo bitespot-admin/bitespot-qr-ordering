@@ -1,44 +1,64 @@
-# BiteSpot — QR Table Ordering System
+# BiteSpot — Multi-Tenant QR Table Ordering System
 
-A production-ready QR table ordering system for Nigerian restaurants. Customers scan a table's QR code, browse the menu, order, and track their order status live. Restaurant owners manage everything from a desktop dashboard with a simplified kitchen workflow.
+A production-ready, multi-tenant QR table ordering platform. A platform (super) admin onboards restaurants; each restaurant runs its own menu, tables, kitchen workflow, and image hosting. Customers scan a table's QR code, browse the menu, order, and track their order live — no accounts, no app download.
 
-Tested end-to-end during development: registration/login, category & menu CRUD, table + branded QR flyer generation, public menu resolution by QR, order placement with server-side price validation, live order-status polling, and the full kitchen workflow.
+Every feature below has been exercised against a real MariaDB instance and a running server during development (not just written and assumed to work) — registration flows, order lifecycle, real-time push, encryption round-trips, and per-tenant credential isolation were all verified live.
 
 ## Stack
 
-- **Frontend (customer):** HTML / CSS / vanilla JS — mobile-first, dark "ember" theme (Fraunces + Manrope + Space Mono)
-- **Frontend (admin):** HTML / CSS / vanilla JS — desktop-first, same visual theme, responsive down to tablet/mobile
+- **Frontend (customer + admin + super admin):** HTML / CSS / vanilla JS — dark "ember" theme by default (Fraunces + Manrope + Space Mono), with a light theme toggle (the original white/orange look) persisted per browser
 - **Backend:** Node.js + Express, MVC structure
 - **Database:** MariaDB (parameterized queries via `mysql2`, no ORM)
-- **Auth:** JWT in HttpOnly cookies + `bcryptjs` (never localStorage). Using `bcryptjs` instead of `bcrypt` deliberately — it's pure JS with no native build step, which matters if you're developing in Termux/Android where node-gyp compilation is a headache.
-- **Images:** Cloudinary (menu photos, logos, generated QR flyers)
-- **QR flyers:** each table gets a branded flyer — a real QR code + the restaurant's name composited onto artwork via `sharp`, uploaded to Cloudinary
+- **Real-time:** Socket.IO — order updates and waiter calls push instantly to open admin dashboards and the customer's order-tracking page, no polling required (a slow fallback poll still runs as a safety net for dropped connections)
+- **Auth:** JWT in HttpOnly cookies + `bcryptjs` (never localStorage). `bcryptjs` is used instead of `bcrypt` deliberately — pure JS, no native build step, which matters on Termux/Android where node-gyp compilation is a headache
+- **Images:** Cloudinary — **per restaurant**, not shared (see below)
+- **QR flyers:** each table gets a branded flyer — a real QR code + the restaurant's name composited onto artwork via `jimp` (pure JS, no native deps — see the note below on why this isn't `sharp`)
+- **Printable receipts:** browser-native print (`window.print()`) with a thermal-receipt-style layout — works with any printer the browser already sees, no vendor SDK needed
 
-### ⚠️ A note on `sharp` and Termux
+## Multi-tenancy: how restaurants get created
 
-`sharp` is a native module, same category of problem as the original `bcrypt`. Its prebuilt binaries target standard Linux/macOS/Windows and are **not guaranteed to install cleanly on Termux/Android** (different libc, no matching prebuild). If `npm install` fails on `sharp` specifically:
-- Try running the backend on a regular Linux server/VPS instead of directly on-device, or
-- Tell me and I'll swap `backend/utils/flyerGenerator.js` to use `jimp` (pure JS, no native deps) instead — slightly less refined text rendering (bitmap fonts instead of arbitrary TTF/SVG), but it'll install anywhere `bcryptjs` does.
+There's no public "sign up your restaurant" page. A **super admin** creates every restaurant tenant from `/super-admin/dashboard.html`, which also hands back that restaurant's login credentials once (copy them somewhere safe — they're not shown again).
+
+Your first super admin account is created automatically on first boot from `SUPER_ADMIN_USERNAME` / `SUPER_ADMIN_PASSWORD` in `.env` (see Setup below). There's no self-service super-admin signup either — that's intentional.
+
+Super admin can also suspend/reactivate a restaurant at any time; a suspended restaurant's owner can't log in and its public menu stops accepting orders.
+
+## Cloudinary: one account per restaurant, not shared
+
+Each restaurant hosts its own menu photos, logo, and QR flyers on **its own** Cloudinary account — there is no shared/global Cloudinary account. This is set at creation time (the super admin form requires a cloud name, API key, and API secret before it'll create the restaurant) and can be changed later by the restaurant owner under **Settings → Cloudinary Account**.
+
+The API secret is encrypted at rest (AES-256-GCM) using `CREDENTIALS_ENCRYPTION_KEY` from `.env` — never stored in plaintext. See Setup below for how to generate that key.
+
+Technical note for anyone extending this: the Cloudinary Node SDK holds config as global mutable state, not per-instance. `backend/config/cloudinary.js` handles this safely for concurrent multi-tenant requests by calling `cloudinary.config(...)` and starting the upload in the same synchronous tick (no `await` between them) — see the comments there before changing upload code.
+
+### ⚠️ A note on `jimp` vs `sharp`
+
+The flyer generator originally used `sharp`, a native module. That caused real install failures on Termux/Android (same category of problem as the original `bcrypt`), so it was swapped for `jimp` — pure JS, installs anywhere `bcryptjs` does. The tradeoff: `jimp`'s built-in fonts are a handful of fixed bitmap sizes rather than continuously-scalable TTF/SVG text, so very long restaurant names snap to the next-smaller preset instead of shrinking smoothly. Still always centered, never overflows.
 
 ## Project structure
 
 ```
 backend/
   assets/
-    flyer-template.png   # branded table-flyer artwork (QR + restaurant name composited in at runtime)
-  config/        # db.js (MariaDB pool), cloudinary.js
-  controllers/    # one per resource
-  middleware/     # auth guard, multer upload, error handler
-  models/         # raw parameterized SQL, no ORM
-  routes/         # REST endpoints, mounted in app.js
-  utils/          # JWT signing, slugify, order numbers, flyer generation
+    flyer-template.png     # default branded flyer artwork (QR + restaurant name composited in at runtime)
+  bootstrap.js              # creates the first super admin on boot, if none exists
+  realtime.js               # Socket.IO room/auth wiring
+  config/                   # db.js (MariaDB pool), cloudinary.js (per-restaurant config helper)
+  controllers/               # one per resource, incl. superAdminController.js
+  middleware/                # authMiddleware (restaurant), superAdminMiddleware, upload, error handler
+  models/                    # raw parameterized SQL, no ORM
+  routes/                    # REST endpoints, mounted in app.js
+  utils/                      # JWT signing, slugify, flyer generation, crypto (credential encryption)
   database/
-    schema.sql    # full MariaDB schema with foreign keys
+    schema.sql               # fresh-install schema
+    migrations/               # incremental migrations for upgrading an existing database
   app.js
   server.js
 public/
   customer/       # menu.html, cart.html, success.html, order-status.html (mobile-first)
-  admin/          # login, register, dashboard, menu, orders, tables, settings (desktop-first)
+  admin/          # per-restaurant dashboard: login, dashboard, menu, orders, tables, settings (desktop-first)
+  super-admin/    # platform admin: login, dashboard (create/suspend restaurants)
+  shared/         # theme-toggle.js, used by all three apps above
 ```
 
 ## Setup
@@ -47,13 +67,22 @@ public/
    ```
    mysql -u root -p < backend/database/schema.sql
    ```
+   Upgrading an existing database instead of starting fresh? Run the migrations in order:
+   ```
+   mysql -u root -p qr_ordering < backend/database/migrations/002_multi_tenant_and_flyer.sql
+   mysql -u root -p qr_ordering < backend/database/migrations/003_per_restaurant_cloudinary.sql
+   ```
 
 2. **Configure environment variables**
    ```
    cd backend
    cp .env.example .env
    ```
-   Fill in `.env` with your MariaDB credentials, a long random `JWT_SECRET`, and your Cloudinary credentials (free tier is fine — https://cloudinary.com).
+   Fill in MariaDB credentials and a long random `JWT_SECRET`. Then generate the credentials encryption key:
+   ```
+   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+   ```
+   and put it in `CREDENTIALS_ENCRYPTION_KEY`. Also set `SUPER_ADMIN_USERNAME` / `SUPER_ADMIN_PASSWORD` (used once, on first boot, to create your platform admin account).
 
 3. **Install dependencies and run**
    ```
@@ -62,25 +91,33 @@ public/
    # or
    npm start         # plain node, for production
    ```
+   On first boot you'll see `✅ Created first super admin account: <username>` in the console.
 
-4. **Register a restaurant**
-   Visit `http://localhost:5000/admin/register.html`, create an account, then go to **Tables & QR** to add your first table — its branded QR flyer is generated and uploaded automatically. Add categories and menu items under **Menu**.
+4. **Onboard your first restaurant**
+   Visit `http://localhost:5000/super-admin/login.html`, log in with your bootstrap credentials, and click **Create Restaurant**. You'll need a Cloudinary account for that restaurant first (free tier is fine — https://cloudinary.com) to fill in its cloud name/API key/API secret. The form shows you the restaurant's login credentials once — copy them to hand to the owner.
 
-5. **Try the customer flow**
-   Download a table's flyer from the dashboard, or just visit the URL it encodes directly:
-   `http://localhost:5000/menu/<restaurant-slug>/<table-slug>`
+5. **Restaurant owner logs in**
+   `http://localhost:5000/admin/login.html` with the credentials from step 4. Add categories/menu items under **Menu**, then add tables under **Tables & QR** — each table's branded QR flyer generates automatically.
 
-## How the QR flow works
-
-Each table gets a unique URL like `/menu/bella-kitchen/table-1`. The backend resolves the restaurant and table straight from that URL — the customer never types a table number. Scanning the code, browsing, adding items, placing an order, and tracking it on `order-status.html` all happen with zero login.
+6. **Try the customer flow**
+   Download a table's flyer from the dashboard, or visit the URL it encodes directly: `http://localhost:5000/menu/<restaurant-slug>/<table-slug>`.
 
 ## Kitchen workflow (simplified)
 
-Orders move through exactly three states: **New → Preparing → Served** (plus Cancelled). There's no separate "Ready" stage — staff hit **Accept** to start preparing, then **Mark as Served** when it's delivered. The `ready` enum value still exists in the database schema for backward compatibility, but the app never transitions into it.
+Orders move through exactly three states: **New → Preparing → Served** (plus Cancelled). Staff hit **Accept** to start preparing, then **Mark as Served** when it's delivered — no separate "Ready" stage. The kitchen board updates via Socket.IO push the instant an order is placed or changes status; a slow fallback poll (30s) covers dropped connections. The "Served" column only shows today's orders — it's a same-day log, not an unbounded archive.
+
+Each order card has a **Print Receipt** button that opens a clean, thermal-receipt-styled print view via the browser's native print dialog.
+
+## Custom flyer option
+
+Under **Settings → Table Flyer**, a restaurant can switch from the default branded artwork to their own uploaded design. In custom mode, only the QR code is composited on (centered, on a white backdrop for scan reliability) — restaurant name text is never auto-overlaid on custom artwork, since there's no way to know where a safe/readable area is on an arbitrary image.
+
+## How the QR flow works
+
+Each table gets a unique URL like `/menu/bella-kitchen/table-1`. The backend resolves the restaurant and table straight from that URL — the customer never types a table number. Scanning the code, browsing, ordering, and tracking status on `order-status.html` all happen with zero login, and status updates arrive live via Socket.IO.
 
 ## Notes on scope
 
-Per the brief, this deliberately excludes: online payments, customer accounts/order history, delivery, coupons, loyalty, reservations, reviews, inventory management, multi-language support, and push notifications. It's built to be extended into a multi-restaurant SaaS platform later without a rewrite (each resource is already scoped by `restaurant_id`).
+Per the original brief, this deliberately excludes: online payments, customer accounts/order history, delivery, coupons, loyalty, reservations, reviews, inventory management, multi-language support, and push notifications.
 
-One deviation worth flagging: the brief's tech-stack section specifies vanilla JS for the frontend, but the closing "Development Philosophy" paragraph mentions React components for the admin dashboard. I built both the customer and admin UIs in vanilla HTML/CSS/JS for consistency, simplicity, and to keep the codebase approachable — the admin dashboard is just as componentized (shared `admin-api.js`, per-page modules) so migrating pieces to React later would be straightforward if you want that.
-
+Feature ideas not yet built, worth considering next: order history/analytics, table-visit bill grouping, menu item modifiers (extra cheese, spice level, etc. as structured options), multiple staff logins per restaurant (not just one owner account), bulk "print all flyers" PDF sheet, WhatsApp/SMS order-ready notifications.
