@@ -10,7 +10,7 @@ const {
   setRestaurantStatus
 } = require('../controllers/superAdminController');
 
-router.post('/login', login);
+router.post('/login', loginLimiter, login);
 router.post('/logout', logout);
 router.get('/me', protectSuperAdmin, me);
 router.get('/restaurants', protectSuperAdmin, listRestaurants);

@@ -5,7 +5,7 @@ const { login, logout, me, changePassword } = require('../controllers/authContro
 
 // No public /register route — in the multi-tenant model, restaurant
 // accounts are created only by a super admin (see superAdminRoutes.js).
-router.post('/login', login);
+router.post('/login', loginLimiter, login);
 router.post('/logout', logout);
 router.get('/me', protect, me);
 router.patch('/password', protect, changePassword);
