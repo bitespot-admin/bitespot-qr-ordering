@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { protect } = require('../middleware/authMiddleware');
+const { loginLimiter } = require('../middleware/rateLimitMiddleware');
 const { login, logout, me, changePassword } = require('../controllers/authController');
 
 // No public /register route — in the multi-tenant model, restaurant

@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { loginLimiter } = require('../middleware/rateLimitMiddleware');
 const { protectSuperAdmin } = require('../middleware/superAdminMiddleware');
 const {
   login,
