@@ -1,18 +1,6 @@
-const { Readable } = require('stream');
 const MenuItem = require('../models/MenuItem');
-const cloudinary = require('../config/cloudinary');
-
-// Streams a multer memory-buffer straight into Cloudinary — the image
-// never touches the project's disk.
-function uploadBufferToCloudinary(buffer, folder) {
-  return new Promise((resolve, reject) => {
-    const uploadStream = cloudinary.uploader.upload_stream({ folder }, (err, result) => {
-      if (err) return reject(err);
-      resolve(result);
-    });
-    Readable.from(buffer).pipe(uploadStream);
-  });
-}
+const Restaurant = require('../models/Restaurant');
+const { uploadBufferForRestaurant, destroyForRestaurant } = require('../utils/cloudinaryUpload');
 
 async function getMenuItems(req, res, next) {
   try {
@@ -36,7 +24,10 @@ async function createMenuItem(req, res, next) {
     let imageUrl = null;
     let imagePublicId = null;
     if (req.file) {
-      const result = await uploadBufferToCloudinary(req.file.buffer, `qr-ordering/${req.user.restaurantId}/menu`);
+      const restaurant = await Restaurant.findById(req.user.restaurantId);
+      const result = await uploadBufferForRestaurant(restaurant, req.file.buffer, {
+        folder: `qr-ordering/${restaurant.slug}/menu`
+      });
       imageUrl = result.secure_url;
       imagePublicId = result.public_id;
     }
@@ -73,9 +64,12 @@ async function updateMenuItem(req, res, next) {
     });
 
     if (req.file) {
-      const result = await uploadBufferToCloudinary(req.file.buffer, `qr-ordering/${req.user.restaurantId}/menu`);
+      const restaurant = await Restaurant.findById(req.user.restaurantId);
+      const result = await uploadBufferForRestaurant(restaurant, req.file.buffer, {
+        folder: `qr-ordering/${restaurant.slug}/menu`
+      });
       if (item.image_public_id) {
-        await cloudinary.uploader.destroy(item.image_public_id).catch(() => {});
+        await destroyForRestaurant(restaurant, item.image_public_id).catch(() => {});
       }
       await MenuItem.updateImage(req.params.id, { imageUrl: result.secure_url, imagePublicId: result.public_id });
     }
@@ -106,7 +100,8 @@ async function deleteMenuItem(req, res, next) {
       return res.status(404).json({ success: false, message: 'Menu item not found.' });
     }
     if (item.image_public_id) {
-      await cloudinary.uploader.destroy(item.image_public_id).catch(() => {});
+      const restaurant = await Restaurant.findById(req.user.restaurantId);
+      await destroyForRestaurant(restaurant, item.image_public_id).catch(() => {});
     }
     await MenuItem.remove(req.params.id);
     res.json({ success: true, message: 'Menu item deleted.' });

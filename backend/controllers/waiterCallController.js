@@ -1,6 +1,7 @@
 const WaiterCall = require('../models/WaiterCall');
 const Table = require('../models/Table');
 const Restaurant = require('../models/Restaurant');
+const { getIO } = require('../realtime');
 
 // POST /api/public/waiter-calls  (no auth)
 // Body: { restaurantSlug, tableSlug }
@@ -16,7 +17,15 @@ async function createWaiterCall(req, res, next) {
       return res.status(404).json({ success: false, message: 'Table not found.' });
     }
 
-    await WaiterCall.create({ restaurantId: restaurant.id, tableId: table.id });
+    const callId = await WaiterCall.create({ restaurantId: restaurant.id, tableId: table.id });
+
+    // Push instantly to any open admin dashboard — this is what triggers
+    // the alert sound on the admin side.
+    getIO().to(`restaurant:${restaurant.id}`).emit('waiter:call', {
+      id: callId,
+      tableLabel: table.label
+    });
+
     res.status(201).json({ success: true, message: 'A waiter has been notified.' });
   } catch (err) {
     next(err);

@@ -43,6 +43,43 @@ const Restaurant = {
       'UPDATE restaurants SET logo_url = :logoUrl, logo_public_id = :logoPublicId WHERE id = :id',
       { id, logoUrl, logoPublicId }
     );
+  },
+
+  // --- Super admin: manage tenants ---
+  async findAllWithOwner() {
+    const [rows] = await pool.query(`
+      SELECT r.*, u.username AS owner_username
+      FROM restaurants r
+      JOIN users u ON u.id = r.user_id
+      ORDER BY r.created_at DESC
+    `);
+    return rows;
+  },
+
+  async setStatus(id, status) {
+    await pool.query('UPDATE restaurants SET status = :status WHERE id = :id', { id, status });
+  },
+
+  // --- Custom flyer template (per restaurant) ---
+  async setFlyerMode(id, flyerMode) {
+    await pool.query('UPDATE restaurants SET flyer_mode = :flyerMode WHERE id = :id', { id, flyerMode });
+  },
+
+  async updateCustomFlyer(id, { customFlyerUrl, customFlyerPublicId }) {
+    await pool.query(
+      'UPDATE restaurants SET custom_flyer_url = :customFlyerUrl, custom_flyer_public_id = :customFlyerPublicId WHERE id = :id',
+      { id, customFlyerUrl, customFlyerPublicId }
+    );
+  },
+
+  // --- Per-restaurant Cloudinary credentials ---
+  async updateCloudinaryCredentials(id, { cloudName, apiKey, apiSecretEncrypted }) {
+    await pool.query(
+      `UPDATE restaurants
+       SET cloudinary_cloud_name = :cloudName, cloudinary_api_key = :apiKey, cloudinary_api_secret_encrypted = :apiSecretEncrypted
+       WHERE id = :id`,
+      { id, cloudName, apiKey, apiSecretEncrypted }
+    );
   }
 };
 

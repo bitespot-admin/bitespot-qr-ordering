@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const { protect } = require('../middleware/authMiddleware');
-const { register, login, logout, me, changePassword } = require('../controllers/authController');
+const { login, logout, me, changePassword } = require('../controllers/authController');
 
-router.post('/register', register);
+// No public /register route — in the multi-tenant model, restaurant
+// accounts are created only by a super admin (see superAdminRoutes.js).
 router.post('/login', login);
 router.post('/logout', logout);
 router.get('/me', protect, me);

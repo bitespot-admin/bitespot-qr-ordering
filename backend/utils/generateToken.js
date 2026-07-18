@@ -1,14 +1,16 @@
 const jwt = require('jsonwebtoken');
 
-// Signs a JWT for a restaurant owner and drops it into an HttpOnly cookie.
-// The token is never sent to the client as JSON and never touches
-// localStorage — this is the one place it's issued.
-function generateToken(res, payload) {
+// Signs a JWT and drops it into an HttpOnly cookie. The token is never
+// sent to the client as JSON and never touches localStorage — this is
+// the one place it's issued. `cookieName` defaults to the restaurant
+// owner's cookie; super admin sessions pass 'super_token' instead so
+// the two kinds of session can never collide in the same browser.
+function generateToken(res, payload, cookieName = 'token') {
   const token = jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN || '7d'
   });
 
-  res.cookie('token', token, {
+  res.cookie(cookieName, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',

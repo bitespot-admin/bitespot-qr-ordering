@@ -14,6 +14,7 @@ const orderRoutes = require('./routes/orderRoutes');
 const waiterCallRoutes = require('./routes/waiterCallRoutes');
 const settingsRoutes = require('./routes/settingsRoutes');
 const publicRoutes = require('./routes/publicRoutes');
+const superAdminRoutes = require('./routes/superAdminRoutes');
 
 const app = express();
 
@@ -31,6 +32,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/waiter-calls', waiterCallRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/public', publicRoutes);
+app.use('/api/super-admin', superAdminRoutes);
 
 // ---- Static frontend (customer + admin) ----
 const publicDir = path.join(__dirname, '..', 'public');
@@ -48,6 +50,14 @@ app.get('/admin', (req, res) => res.sendFile(path.join(publicDir, 'admin', 'logi
 app.get('/admin/*', (req, res, next) => {
   const page = req.params[0].split('/')[0] || 'login';
   const filePath = path.join(publicDir, 'admin', `${page}.html`);
+  res.sendFile(filePath, (err) => (err ? next() : null));
+});
+
+// Super admin panel entry points (separate from the per-restaurant admin above)
+app.get('/super-admin', (req, res) => res.sendFile(path.join(publicDir, 'super-admin', 'login.html')));
+app.get('/super-admin/*', (req, res, next) => {
+  const page = req.params[0].split('/')[0] || 'login';
+  const filePath = path.join(publicDir, 'super-admin', `${page}.html`);
   res.sendFile(filePath, (err) => (err ? next() : null));
 });
 

@@ -2,6 +2,7 @@ const Order = require('../models/Order');
 const MenuItem = require('../models/MenuItem');
 const Table = require('../models/Table');
 const Restaurant = require('../models/Restaurant');
+const { getIO } = require('../realtime');
 
 // POST /api/public/orders  (no auth — customer places an order from the menu)
 // Body: { restaurantSlug, tableSlug, items: [{ menuItemId, quantity }], specialInstructions }
@@ -16,6 +17,9 @@ async function placeOrder(req, res, next) {
     const restaurant = await Restaurant.findBySlug(restaurantSlug);
     if (!restaurant) {
       return res.status(404).json({ success: false, message: 'Restaurant not found.' });
+    }
+    if (restaurant.status === 'suspended') {
+      return res.status(403).json({ success: false, message: 'This restaurant is not currently accepting orders.' });
     }
     const table = await Table.findBySlug(restaurant.id, tableSlug);
     if (!table) {
@@ -41,16 +45,29 @@ async function placeOrder(req, res, next) {
       items: resolvedItems
     });
 
+    // Push straight to any open admin dashboard for this restaurant —
+    // this is what lets the kitchen board update without polling.
+    getIO().to(`restaurant:${restaurant.id}`).emit('order:new', {
+      id: order.orderId,
+      orderNumber: order.orderNumber,
+      tableLabel: table.label,
+      subtotal: order.subtotal
+    });
+
     res.status(201).json({ success: true, data: order });
   } catch (err) {
     next(err);
   }
 }
 
-// GET /api/orders  (admin) — optional ?status=new|preparing|ready|served|cancelled
+// GET /api/orders  (admin) — optional ?status=new|preparing|served|cancelled
+// Defaults to today's orders only, since the kitchen board isn't meant to
+// accumulate a permanent archive. Pass ?all=true to see everything (useful
+// for a future order-history/reporting view).
 async function getOrders(req, res, next) {
   try {
-    const orders = await Order.findAllByRestaurant(req.user.restaurantId, { status: req.query.status });
+    const todayOnly = req.query.all !== 'true';
+    const orders = await Order.findAllByRestaurant(req.user.restaurantId, { status: req.query.status, todayOnly });
     res.json({ success: true, data: orders });
   } catch (err) {
     next(err);
@@ -86,6 +103,14 @@ async function updateOrderStatus(req, res, next) {
     }
 
     await Order.updateStatus(order.id, status);
+
+    // Two audiences for this event: any other admin screen open on this
+    // restaurant (so two staff devices stay in sync), and the specific
+    // customer tracking this exact order (so their status page updates
+    // instantly instead of waiting for its next poll).
+    getIO().to(`restaurant:${req.user.restaurantId}`).emit('order:status', { id: order.id, status });
+    getIO().to(`order:${order.id}`).emit('order:status', { id: order.id, status });
+
     res.json({ success: true, message: `Order marked as ${status}.` });
   } catch (err) {
     next(err);

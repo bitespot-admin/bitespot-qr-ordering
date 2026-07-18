@@ -43,7 +43,7 @@ const Order = {
     }
   },
 
-  async findAllByRestaurant(restaurantId, { status } = {}) {
+  async findAllByRestaurant(restaurantId, { status, todayOnly } = {}) {
     let query = `
       SELECT o.*, t.label AS table_label
       FROM orders o
@@ -54,6 +54,9 @@ const Order = {
     if (status) {
       query += ' AND o.status = :status';
       params.status = status;
+    }
+    if (todayOnly) {
+      query += ' AND DATE(o.created_at) = CURDATE()';
     }
     query += ' ORDER BY o.created_at DESC';
 

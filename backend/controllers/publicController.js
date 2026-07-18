@@ -15,6 +15,9 @@ async function getPublicMenu(req, res, next) {
     if (!restaurant) {
       return res.status(404).json({ success: false, message: 'Restaurant not found.' });
     }
+    if (restaurant.status === 'suspended') {
+      return res.status(404).json({ success: false, message: 'This restaurant is not currently accepting orders.' });
+    }
 
     const table = await Table.findBySlug(restaurant.id, tableSlug);
     if (!table || !table.is_active) {

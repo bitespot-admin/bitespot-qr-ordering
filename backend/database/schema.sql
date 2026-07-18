@@ -7,6 +7,16 @@ CREATE DATABASE IF NOT EXISTS qr_ordering CHARACTER SET utf8mb4 COLLATE utf8mb4_
 USE qr_ordering;
 
 -- ------------------------------------------------------------
+-- super_admins  (platform operators — create/manage restaurant tenants)
+-- ------------------------------------------------------------
+CREATE TABLE super_admins (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(50) NOT NULL UNIQUE,
+  password_hash VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- ------------------------------------------------------------
 -- users  (restaurant owner / admin accounts — one per restaurant)
 -- ------------------------------------------------------------
 CREATE TABLE users (
@@ -30,6 +40,13 @@ CREATE TABLE restaurants (
   phone VARCHAR(30) DEFAULT NULL,
   address VARCHAR(255) DEFAULT NULL,
   opening_hours VARCHAR(255) DEFAULT NULL,
+  status ENUM('active','suspended') NOT NULL DEFAULT 'active',
+  flyer_mode ENUM('default','custom') NOT NULL DEFAULT 'default',
+  custom_flyer_url VARCHAR(500) DEFAULT NULL,
+  custom_flyer_public_id VARCHAR(255) DEFAULT NULL,
+  cloudinary_cloud_name VARCHAR(120) DEFAULT NULL,
+  cloudinary_api_key VARCHAR(120) DEFAULT NULL,
+  cloudinary_api_secret_encrypted VARCHAR(500) DEFAULT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT fk_restaurants_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
