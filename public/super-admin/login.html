@@ -35,26 +35,82 @@
 <script src="/super-admin/js/super-admin-api.js"></script>
 <script>
   document.getElementById('loginForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const errorBox = document.getElementById('formError');
-    const btn = document.getElementById('submitBtn');
-    errorBox.classList.remove('show');
-    btn.disabled = true;
-    btn.textContent = 'Logging in...';
+  e.preventDefault();
 
-    try {
-      await SuperAdminApi.login({
-        username: document.getElementById('username').value.trim(),
-        password: document.getElementById('password').value
-      });
-      location.href = '/super-admin/dashboard.html';
-    } catch (err) {
-      errorBox.textContent = err.message;
-      errorBox.classList.add('show');
-      btn.disabled = false;
-      btn.textContent = 'Log In';
+  const errorBox = document.getElementById('formError');
+  const btn = document.getElementById('submitBtn');
+
+  errorBox.classList.remove('show');
+  btn.disabled = true;
+  btn.textContent = 'Logging in...';
+
+  const body = {
+    username: document.getElementById('username').value.trim(),
+    password: document.getElementById('password').value
+  };
+
+  try {
+    console.log("========== LOGIN REQUEST ==========");
+    console.log("Request Body:", body);
+
+    const response = await fetch('/api/super-admin/login', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+
+    console.log("Status:", response.status);
+    console.log("OK:", response.ok);
+    console.log("URL:", response.url);
+    console.log("Redirected:", response.redirected);
+
+    console.log("Headers:");
+    for (const [key, value] of response.headers.entries()) {
+      console.log(key + ":", value);
     }
-  });
+
+    const text = await response.text();
+    console.log("Response Body:");
+    console.log(text);
+
+    let json = {};
+    try {
+      json = JSON.parse(text);
+    } catch {}
+
+    console.log("Cookies after login:", document.cookie);
+
+    if (!response.ok) {
+      throw new Error(json.message || "Login failed");
+    }
+
+    console.log("========== TESTING /me ==========");
+
+    const me = await fetch('/api/super-admin/me', {
+      credentials: 'include'
+    });
+
+    console.log("/me Status:", me.status);
+
+    const meText = await me.text();
+    console.log("/me Response:");
+    console.log(meText);
+
+    location.href = "/super-admin/dashboard.html";
+
+  } catch (err) {
+    console.error(err);
+
+    errorBox.textContent = err.message;
+    errorBox.classList.add('show');
+
+    btn.disabled = false;
+    btn.textContent = 'Log In';
+  }
+});
 </script>
 <script src="/shared/theme-toggle.js"></script>
 <script src="/shared/eruda.js"></script>
