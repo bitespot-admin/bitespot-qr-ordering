@@ -57,5 +57,14 @@
 <script src="/super-admin/js/super-admin-api.js"></script>
 <script src="/super-admin/js/dashboard.js"></script>
 <script src="/shared/theme-toggle.js"></script>
+<script src="/shared/eruda.js"></script>
+<script>
+console.log(window.eruda);
+console.log(typeof window.eruda);
+
+if (window.eruda) {
+    window.eruda.init();
+}
+</script>
 </body>
 </html>

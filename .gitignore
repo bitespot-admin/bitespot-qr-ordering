@@ -28,5 +28,14 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
-.env.example
-.env.backup
+
+# Keep this tracked
+!.env.example
+
+# Debug files
+public/shared/eruda.js
+public/test.html
+
+# Test scripts
+backend/test-password.js
+backend/scripts/test-password.js

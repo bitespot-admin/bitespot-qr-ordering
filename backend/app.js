@@ -20,16 +20,8 @@ const superAdminRoutes = require('./routes/superAdminRoutes');
 
 const app = express();
 
+app.disable('x-powered-by');
 app.set('trust proxy', 1);
-
-app.use(cors({
-  origin: process.env.CLIENT_URL,
-  credentials: true
-}));
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes

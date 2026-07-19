@@ -9,36 +9,35 @@ const { encrypt } = require('../utils/crypto');
 // POST /api/super-admin/login
 async function login(req, res, next) {
   try {
+
     const { username, password } = req.body;
-    if (!username || !password) {
-      return res.status(400).json({ success: false, message: 'Username and password are required.' });
-    }
 
     const admin = await SuperAdmin.findByUsername(username);
+
     if (!admin) {
       return res.status(401).json({ success: false, message: 'Invalid username or password.' });
     }
 
-     console.log("Super admin login:", username, admin);
-
     const match = await bcrypt.compare(password, admin.password_hash);
+
     if (!match) {
       return res.status(401).json({ success: false, message: 'Invalid username or password.' });
     }
 
-    console.log("Password verified");
-
-    generateToken(res, { superAdminId: admin.id, username: admin.username, role: 'super_admin' }, 'super_token');
-
+    generateToken(res, {
+      superAdminId: admin.id,
+      username: admin.username,
+      role: 'super_admin'
+    }, 'super_token');
 
     res.json({ success: true, data: { username: admin.username } });
 
-    console.log("Token sent");
-
   } catch (err) {
+    console.error(err);
     next(err);
   }
 }
+
 
 // POST /api/super-admin/logout
 function logout(req, res) {
