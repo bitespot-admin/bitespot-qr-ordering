@@ -63,6 +63,13 @@ app.get('/menu/:restaurantSlug/:tableSlug', (req, res) => {
   res.sendFile(path.join(publicDir, 'customer', 'menu.html'));
 });
 
+app.get('/api/debug', (req, res) => {
+  res.json({
+    cookies: req.cookies,
+    headers: req.headers
+  });
+});
+
 // Admin dashboard entry points
 app.get('/admin', (req, res) => res.sendFile(path.join(publicDir, 'admin', 'login.html')));
 app.get('/admin/*', (req, res, next) => {
