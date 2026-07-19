@@ -33,7 +33,7 @@ Thumbs.db
 !.env.example
 
 # Debug files
-public/shared/eruda.js
+public/contents.txt
 public/test.html
 
 # Test scripts

@@ -18,11 +18,4 @@ router.get('/restaurants', protectSuperAdmin, listRestaurants);
 router.post('/restaurants', protectSuperAdmin, createRestaurant);
 router.patch('/restaurants/:id/status', protectSuperAdmin, setRestaurantStatus);
 
-router.get('/debug', (req, res) => {
-  res.json({
-    cookies: req.cookies,
-    headers: req.headers
-  });
-});
-
 module.exports = router;

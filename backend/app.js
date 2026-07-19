@@ -4,6 +4,7 @@ const cookieParser = require('cookie-parser');
 const path = require('path');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
+const morgan = require('morgan');
 require('dotenv').config();
 
 const { notFound, errorHandler } = require('./middleware/errorHandler');
@@ -40,6 +41,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(helmet());
 app.use(limiter);
+if (process.env.NODE_ENV !== 'production') {
+  app.use(morgan('dev'));
+}
 
 // ---- API routes ----
 app.use('/api/auth', authRoutes);
@@ -63,13 +67,6 @@ app.get('/menu/:restaurantSlug/:tableSlug', (req, res) => {
   res.sendFile(path.join(publicDir, 'customer', 'menu.html'));
 });
 
-app.get('/api/debug', (req, res) => {
-  res.json({
-    cookies: req.cookies,
-    headers: req.headers
-  });
-});
-
 // Admin dashboard entry points
 app.get('/admin', (req, res) => res.sendFile(path.join(publicDir, 'admin', 'login.html')));
 app.get('/admin/*', (req, res, next) => {
@@ -79,7 +76,7 @@ app.get('/admin/*', (req, res, next) => {
 });
 
 // Super admin panel entry points (separate from the per-restaurant admin above)
-app.get('/super-admin', (req, res) => res.sendFile(path.join(publicDir, 'super-admin', 'login.html')));
+app.get('/super-admin', (req, res) =>  res.sendFile(path.join(publicDir, 'super-admin', 'login.html')));
 app.get('/super-admin/*', (req, res, next) => {
   const page = req.params[0].split('/')[0] || 'login';
   const filePath = path.join(publicDir, 'super-admin', `${page}.html`);

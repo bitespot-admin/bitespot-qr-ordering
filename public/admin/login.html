@@ -30,34 +30,17 @@
       <button type="submit" class="btn btn-orange btn-full" id="submitBtn">Log In</button>
     </form>
 
-    <p class="auth-switch">Need an account? Contact your platform administrator.</p>
+    <p class="auth-switch">
+  Need an account?
+  <a href="https://wa.me/2349134744223?text=Hi%20BiteSpot!%20%F0%9F%91%8B%0A%0AI'm%20interested%20in%20getting%20a%20QR%20Menu%20%26%20Ordering%20System%20for%20my%20restaurant.%0A%0AI'd%20like%20to%20know%20more%20about%20pricing,%20setup,%20and%20how%20to%20get%20started." target="_blank" rel="noopener noreferrer">
+    Contact the platform administrator
+  </a>.
+</p>
   </div>
 </div>
 
 <script src="/admin/js/admin-api.js"></script>
-<script>
-  document.getElementById('loginForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const errorBox = document.getElementById('formError');
-    const btn = document.getElementById('submitBtn');
-    errorBox.classList.remove('show');
-    btn.disabled = true;
-    btn.textContent = 'Logging in...';
-
-    try {
-      await AdminApi.login({
-        username: document.getElementById('username').value.trim(),
-        password: document.getElementById('password').value
-      });
-      location.href = '/admin/dashboard.html';
-    } catch (err) {
-      errorBox.textContent = err.message;
-      errorBox.classList.add('show');
-      btn.disabled = false;
-      btn.textContent = 'Log In';
-    }
-  });
-</script>
+<script src="/admin/js/login.js"></script>
 <script src="/shared/theme-toggle.js"></script>
 </body>
 </html>
