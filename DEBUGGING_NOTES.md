@@ -12,3 +12,17 @@ Helmet Content Security Policy blocked inline JavaScript.
 
 Fix:
 Move inline JS to external files (or configure CSP).
+
+## Brave Browser Issue
+
+Symptoms:
+- Images not loading
+- Eruda not loading
+- JS appeared inconsistent
+- Chrome and Opera worked correctly
+
+Cause:
+Brave Shields blocked required resources/scripts.
+
+Fix:
+Turn off Brave Shields for localhost (or the deployed site if necessary).

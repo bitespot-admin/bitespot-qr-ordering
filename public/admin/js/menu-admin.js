@@ -105,7 +105,7 @@ async function loadItems() {
 }
 
 function renderItems() {
-  const body = document.getElementById('itemsBody');
+const body = document.getElementById('itemsBody');
   if (ITEMS.length === 0) {
     body.innerHTML = '<div class="empty-state" style="padding:20px">No menu items yet. Add your first dish.</div>';
     return;
