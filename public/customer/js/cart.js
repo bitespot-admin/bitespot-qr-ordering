@@ -28,7 +28,7 @@ const Cart = {
         id: menuItem.id,
         name: menuItem.name,
         price: Number(menuItem.price),
-        image: menuItem.image_url,
+        image: menuItem.image || menuItem.image_url,
         quantity
       };
     }
