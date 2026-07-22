@@ -362,8 +362,15 @@ a { text-decoration: none; color: inherit; }
   transition: border-color 0.15s, transform 0.15s;
 }
 .item-card:hover { border-color: rgba(232, 163, 61, 0.3); transform: translateY(-2px); }
-.item-card .thumb { width: 100%; height: 140px; object-fit: cover; background: var(--umber); }
-.item-card .body { padding: 15px 17px; display: flex; flex-direction: column; gap: 7px; flex: 1; }
+.item-card .thumb {
+    width: 100%;
+    height: 210px;
+    object-fit: cover;
+    object-position: center;
+    background: var(--umber);
+    cursor: pointer;
+}
+.item-card .body { padding: 13px 15px; display: flex; flex-direction: column; gap: 7px; flex: 1; }
 .item-card h3 { font-family: var(--font-display); font-size: 16px; font-weight: 600; margin: 0; color: var(--cream); }
 .item-card p.desc { font-size: 12.5px; color: var(--cream-dim); margin: 0; line-height: 1.45; min-height: 34px; }
 .item-card .price { font-family: var(--font-mono); font-weight: 700; font-size: 15px; color: var(--ember-bright); }

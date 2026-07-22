@@ -21,3 +21,17 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     btn.textContent = 'Log In';
   }
 });
+
+const passwordInput = document.getElementById("password");
+const toggleBtn = document.querySelector(".toggle-password");
+
+toggleBtn.addEventListener("click", () => {
+  const hidden = passwordInput.type === "password";
+
+  passwordInput.type = hidden ? "text" : "password";
+  toggleBtn.textContent = hidden ? "🙈" : "👁️";
+  toggleBtn.setAttribute(
+    "aria-label",
+    hidden ? "Hide password" : "Show password"
+  );
+});

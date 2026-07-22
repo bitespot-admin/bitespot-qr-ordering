@@ -1,6 +1,7 @@
 const Table = require('../models/Table');
 const Restaurant = require('../models/Restaurant');
 const { slugify } = require('../utils/slugify');
+const { nanoid } = require('nanoid');
 const { generateTableFlyer } = require('../utils/flyerGenerator');
 const { buildTableUrl } = require('../utils/qrGenerator');
 
@@ -24,7 +25,7 @@ async function createTable(req, res, next) {
     }
 
     const restaurant = await Restaurant.findById(req.user.restaurantId);
-    let slug = slugify(label);
+    let slug = nanoid(16);
     if (await Table.slugExists(req.user.restaurantId, slug)) {
       return res.status(409).json({ success: false, message: 'A table with that name already exists.' });
     }
